@@ -12,6 +12,9 @@ def load_and_process_data(dataset_path):
     features, labels = [], []
     feature_dim = None
     
+    # Define target size for all images (reduced from 160x120 to 80x60)
+    TARGET_SIZE = (80, 60)  # 640x480 -> 80x60
+    
     for label_name, label in labels_map.items():
         folder = os.path.join(dataset_path, label_name)
         if not os.path.exists(folder):
@@ -24,11 +27,12 @@ def load_and_process_data(dataset_path):
                 if img is None:
                     raise IOError("Failed to read "+path)
                     
-                # Convert to grayscale and process
+                # Convert to grayscale and resize to target size
                 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                pooled = cv2.resize(gray, (gray.shape[1]//4, gray.shape[0]//4), interpolation=cv2.INTER_AREA)
-                sobelx = cv2.Sobel(pooled, cv2.CV_64F, 1, 0, ksize=3)
-                sobely = cv2.Sobel(pooled, cv2.CV_64F, 0, 1, ksize=3)
+                resized = cv2.resize(gray, TARGET_SIZE, interpolation=cv2.INTER_AREA)
+                
+                sobelx = cv2.Sobel(resized, cv2.CV_64F, 1, 0, ksize=3)
+                sobely = cv2.Sobel(resized, cv2.CV_64F, 0, 1, ksize=3)
                 edges = np.sqrt(sobelx**2 + sobely**2)
                 
                 # Feature extraction
