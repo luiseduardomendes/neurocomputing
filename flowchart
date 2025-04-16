@@ -1,0 +1,36 @@
+// Fluxograma do Algoritmo
+digraph {
+	A [label="Início"]
+	B [label="Carregar Dataset Iris"]
+	C [label="Normalizar Features para Spike Times"]
+	D [label="Dividir Dados em Treino e Teste"]
+	E [label="Inicializar Modelo com RBF"]
+	F [label="Construir Rede Neural"]
+	G [label="Treinar Modelo (10 Épocas)"]
+	H [label="Predizer Rótulos no Conjunto de Teste"]
+	I [label="Calcular Acurácia"]
+	J [label="Plotar Resultados (RBF)"]
+	K [label="Inicializar Modelo com RCE"]
+	L [label="Construir Rede Neural"]
+	M [label="Treinar Modelo (10 Épocas)"]
+	N [label="Predizer Rótulos no Conjunto de Teste"]
+	O [label="Calcular Acurácia"]
+	P [label="Plotar Resultados (RCE)"]
+	Q [label=Fim]
+	A -> B
+	B -> C
+	C -> D
+	D -> E
+	E -> F
+	F -> G
+	G -> H
+	H -> I
+	I -> J
+	J -> K
+	K -> L
+	L -> M
+	M -> N
+	N -> O
+	O -> P
+	P -> Q
+}

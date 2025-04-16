@@ -1,4 +1,4 @@
-from model import DimensionalitySafeKernelRCE
+from model import DimensionalitySafeKernelRCE, SpikingRBFClassifier
 from data_loader import load_and_process_data
 from sklearn.model_selection import KFold
 from sklearn.svm import SVC
@@ -58,21 +58,17 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5):
         activation_threshold=0.01  # Activation threshold
     )
 
-    rbf_model = SVC(
-        kernel='rbf',      # Kernel type
-        gamma="scale",     # Kernel parameter
-        C=0.6,            # Regularization parameter
-        class_weight='balanced',  # Class balancing
-        random_state=42    # Random number generator
+    spiking_rbf_model = SpikingRBFClassifier(
+        gamma=0.1  # Kernel parameter
     )
     
     # Store results
     rce_fold_accuracies = []
-    rbf_fold_accuracies = []
+    spiking_rbf_fold_accuracies = []
     rce_all_y_true = []
     rce_all_y_pred = []
-    rbf_all_y_true = []
-    rbf_all_y_pred = []
+    spiking_rbf_all_y_true = []
+    spiking_rbf_all_y_pred = []
 
     print(f"\nStarting {n_splits}-fold cross-validation for {dataset_name}...")
     for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
@@ -85,15 +81,19 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5):
 
         # Evaluate models
         rce_acc, rce_pred = evaluate_model(rce_model, X_train, X_val, y_train, y_val, "RCE")
-        rbf_acc, rbf_pred = evaluate_model(rbf_model, X_train, X_val, y_train, y_val, "RBF")
+        spiking_rbf_model.fit(X_train, y_train)
+        spiking_rbf_pred = spiking_rbf_model.predict(X_val)
+        spiking_rbf_acc = np.mean(spiking_rbf_pred == y_val)
+
+        print(f"Spiking RBF accuracy: {spiking_rbf_acc * 100:.2f}%")
 
         # Store results
         rce_fold_accuracies.append(rce_acc)
-        rbf_fold_accuracies.append(rbf_acc)
+        spiking_rbf_fold_accuracies.append(spiking_rbf_acc)
         rce_all_y_true.extend(y_val)
         rce_all_y_pred.extend(rce_pred)
-        rbf_all_y_true.extend(y_val)
-        rbf_all_y_pred.extend(rbf_pred)
+        spiking_rbf_all_y_true.extend(y_val)
+        spiking_rbf_all_y_pred.extend(spiking_rbf_pred)
 
     # Final evaluation
     print(f"\nCross-validation results for {dataset_name}:")
@@ -102,10 +102,10 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5):
     print("Mean accuracy: {:.2f}%".format(np.mean(rce_fold_accuracies) * 100))
     print("Standard deviation: {:.2f}%".format(np.std(rce_fold_accuracies) * 100))
 
-    print("\nRBF Model:")
-    print("Individual fold accuracies: {}".format(["{:.2f}%".format(acc * 100) for acc in rbf_fold_accuracies]))
-    print("Mean accuracy: {:.2f}%".format(np.mean(rbf_fold_accuracies) * 100))
-    print("Standard deviation: {:.2f}%".format(np.std(rbf_fold_accuracies) * 100))
+    print("\nSpiking RBF Model:")
+    print("Individual fold accuracies: {}".format(["{:.2f}%".format(acc * 100) for acc in spiking_rbf_fold_accuracies]))
+    print("Mean accuracy: {:.2f}%".format(np.mean(spiking_rbf_fold_accuracies) * 100))
+    print("Standard deviation: {:.2f}%".format(np.std(spiking_rbf_fold_accuracies) * 100))
 
     # Plot results for both models
     print(f"\nRCE Model Results for {dataset_name}:")
@@ -113,10 +113,10 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5):
     plot_accuracy_curve(rce_fold_accuracies)
     print_classification_report(rce_all_y_true, rce_all_y_pred)
 
-    print(f"\nRBF Model Results for {dataset_name}:")
-    plot_confusion_matrix(rbf_all_y_true, rbf_all_y_pred, class_names=target_names)
-    plot_accuracy_curve(rbf_fold_accuracies)
-    print_classification_report(rbf_all_y_true, rbf_all_y_pred)
+    print(f"\nSpiking RBF Model Results for {dataset_name}:")
+    plot_confusion_matrix(spiking_rbf_all_y_true, spiking_rbf_all_y_pred, class_names=target_names)
+    plot_accuracy_curve(spiking_rbf_fold_accuracies)
+    print_classification_report(spiking_rbf_all_y_true, spiking_rbf_all_y_pred)
 
 def main():
     print("Available datasets:")
