@@ -7,7 +7,7 @@ class DimensionalitySafeKernelRCE:
     """Robust classification model using kernel RCE with LDA and spike-based feature transformation."""
     
     def __init__(self, num_prototypes=5, kernel='rbf', gamma=1.0, learning_rate=0.1, 
-                 momentum=0.9, max_epochs=100, activation_threshold=0.9):
+                 momentum=0.9, max_epochs=100, activation_threshold=0.9, regularization=0.01):
         self.num_prototypes = num_prototypes
         self.kernel = kernel
         self.gamma = gamma
@@ -15,6 +15,7 @@ class DimensionalitySafeKernelRCE:
         self.momentum = momentum
         self.max_epochs = max_epochs
         self.activation_threshold = activation_threshold
+        self.regularization = regularization  # Add regularization parameter
 
         self.scaler = StandardScaler()
         self.lda = LinearDiscriminantAnalysis()
@@ -69,6 +70,11 @@ class DimensionalitySafeKernelRCE:
             self.prototypes_[idx * (self.num_prototypes // len(unique_classes)):(idx+1) * (self.num_prototypes // len(unique_classes))] = chosen
             self.labels_[idx * (self.num_prototypes // len(unique_classes)):(idx+1) * (self.num_prototypes // len(unique_classes))] = cls
         print("Prototypes assigned.")
+
+        # Add regularization to prototypes
+        print("Applying regularization to prototypes...")
+        self.prototypes_ -= self.regularization * np.sign(self.prototypes_)
+        print("Regularization applied.")
 
         self._is_fitted = True
         print("Model fitting completed.")
