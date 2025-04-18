@@ -1,0 +1,31 @@
+=== Run Results ===
+
+=== Dataset: HAND ===
+
+RCE:
+Mean Accuracy: 91.38%
+Standard Deviation: 3.46%
+
+RBF:
+Mean Accuracy: 92.57%
+Standard Deviation: 1.97%
+
+=== Dataset: WINE ===
+
+RCE:
+Mean Accuracy: 66.29%
+Standard Deviation: 10.90%
+
+RBF:
+Mean Accuracy: 74.59%
+Standard Deviation: 17.46%
+
+=== Dataset: IRIS ===
+
+RCE:
+Mean Accuracy: 86.67%
+Standard Deviation: 6.32%
+
+RBF:
+Mean Accuracy: 90.67%
+Standard Deviation: 3.89%

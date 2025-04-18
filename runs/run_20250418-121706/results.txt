@@ -1,0 +1,11 @@
+=== Run Results ===
+
+=== Dataset: IRIS ===
+
+RCE:
+Mean Accuracy: 90.67%
+Standard Deviation: 6.46%
+
+RBF:
+Mean Accuracy: 94.00%
+Standard Deviation: 4.42%

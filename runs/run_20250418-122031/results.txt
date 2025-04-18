@@ -1,0 +1,11 @@
+=== Run Results ===
+
+=== Dataset: WINE ===
+
+RCE:
+Mean Accuracy: 82.00%
+Standard Deviation: 3.00%
+
+RBF:
+Mean Accuracy: 91.02%
+Standard Deviation: 3.25%
