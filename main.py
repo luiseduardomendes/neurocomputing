@@ -58,12 +58,11 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5):
         # === Dimensionality-Safe Kernel RCE Classifier ===
         print("\nTraining Dimensionality-Safe Kernel RCE Classifier...")
         rce_model = DimensionalitySafeKernelRCE(
-            num_prototypes=10, 
-            gamma=5.0, 
-            learning_rate=0.005, 
-            momentum=0.9, 
+            num_prototypes=1000, 
+            gamma=1.0, 
+            learning_rate=0.5, 
             max_epochs=1000, 
-            activation_threshold=0.01
+            activation_threshold=0.9
         )
         rce_model.fit(X_train, y_train)
         rce_pred = rce_model.predict(X_val)

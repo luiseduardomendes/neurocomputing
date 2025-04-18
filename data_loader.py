@@ -1,8 +1,9 @@
 import os
 import cv2
 import numpy as np
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
-def load_and_process_data(dataset_path):
+def load_and_process_data(dataset_path, apply_lda=True):
     """Loads and processes image dataset into feature vectors and labels."""
     labels_map = {
         "thumbs_up": 0, "thumbs_down": 1,
@@ -31,6 +32,7 @@ def load_and_process_data(dataset_path):
                 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 resized = cv2.resize(gray, TARGET_SIZE, interpolation=cv2.INTER_AREA)
                 
+                # Compute Sobel edges
                 sobelx = cv2.Sobel(resized, cv2.CV_64F, 1, 0, ksize=3)
                 sobely = cv2.Sobel(resized, cv2.CV_64F, 0, 1, ksize=3)
                 edges = np.sqrt(sobelx**2 + sobely**2)
@@ -55,6 +57,16 @@ def load_and_process_data(dataset_path):
                 
     if not features:
         raise ValueError("No valid images processed")
-        
-    return np.array(features), np.array(labels), feature_dim
+    
+    features = np.array(features)
+    labels = np.array(labels)
+
+    # Apply LDA for dimensionality reduction
+    if apply_lda:
+        print("Applying LDA for dimensionality reduction...")
+        lda = LinearDiscriminantAnalysis(n_components=4)  # Reduce to 4 dimensions
+        features = lda.fit_transform(features, labels)
+        print("LDA applied. Reduced feature dimensions to:", features.shape[1])
+    
+    return features, labels, features.shape[1]
 
