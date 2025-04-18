@@ -40,29 +40,32 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5):
         print(f"\nFold {fold + 1}/{n_splits}")
         X_train, X_val = X[train_idx], X[val_idx]
         y_train, y_val = y[train_idx], y[val_idx]
+        epochs = 10  # Number of epochs for SNN training
 
         # === SNN Autoencoder + RCE Classifier ===
         print("\n🔁 Training SNN Autoencoder + RCE Classifier Pipeline...")
         snn = SNN_Autoencoder(input_size=X.shape[1], hidden_size=3, sim_time=100, learning_rate=0.1)
         rce = RCEModel(gamma=1.0, learning_rate=0.5)
         pipeline_rce = SNN_ClassifierPipeline(snn_model=snn, classifier=rce)
-        pipeline_rce.train(X_train, y_train, snn_epochs=25)
+        pipeline_rce.train(X_train, y_train, snn_epochs=epochs)
         y_pred_rce = pipeline_rce.predict(X_val)
 
         # Evaluate RCE pipeline
         print("\n📊 Evaluating SNN + RCE Classifier...")
         print_classification_report(y_val, y_pred_rce)
+        plot_confusion_matrix(y_val, y_pred_rce, target_names, title=f"SNN + RCE Classifier - {dataset_name} - Fold {fold + 1}")
 
         # === SNN Autoencoder + RBF Classifier ===
         print("\n🔁 Training SNN Autoencoder + RBF Classifier Pipeline...")
         rbf = RBFModel(gamma=0.5)
         pipeline_rbf = SNN_ClassifierPipeline(snn_model=snn, classifier=rbf)
-        pipeline_rbf.train(X_train, y_train, snn_epochs=25)
+        pipeline_rbf.train(X_train, y_train, snn_epochs=epochs)
         y_pred_rbf = pipeline_rbf.predict(X_val)
 
         # Evaluate RBF pipeline
         print("\n📊 Evaluating SNN + RBF Classifier...")
         print_classification_report(y_val, y_pred_rbf)
+        plot_confusion_matrix(y_val, y_pred_rbf, target_names, title=f"SNN + RBF Classifier - {dataset_name} - Fold {fold + 1}")
 
 def main():
     print("Available datasets:")

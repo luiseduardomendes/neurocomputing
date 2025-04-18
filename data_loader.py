@@ -38,7 +38,7 @@ def load_and_process_data(dataset_path, apply_lda=True):
                 edges = np.sqrt(sobelx**2 + sobely**2)
                 
                 # Feature extraction
-                fft = np.log(np.abs(np.fft.fftshift(np.fft.fft2(edges))) + 1)
+                fft = np.log(np.abs(np.fft.fftshift(np.fft.fft2(edges))) + 1e-9)
                 spatial = edges.flatten()
                 combined = np.hstack((fft.flatten(), spatial))
                 
@@ -47,6 +47,10 @@ def load_and_process_data(dataset_path, apply_lda=True):
                     feature_dim = len(combined)
                 elif len(combined) != feature_dim:
                     raise ValueError("Inconsistent feature dimension at "+path)
+                
+                # Check for invalid feature values
+                if np.any(np.isnan(combined)) or np.any(np.isinf(combined)):
+                    raise ValueError(f"Invalid feature values detected at {path}")
                     
                 features.append(combined)
                 labels.append(label)
