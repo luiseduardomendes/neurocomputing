@@ -137,7 +137,7 @@ def main():
         X, y, target_names = load_and_preprocess_data(dataset_name, scale=scale)
 
         print(f"Samples: {X.shape[0]}, Features: {X.shape[1]}, Classes: {len(np.unique(y))}")
-        train_and_evaluate(X, y, target_names, dataset_name, n_splits=3)
+        train_and_evaluate(X, y, target_names, dataset_name, n_splits=5)
 
 
 if __name__ == "__main__":
