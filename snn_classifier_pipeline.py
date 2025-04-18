@@ -16,7 +16,7 @@ class SNN_ClassifierPipeline:
     def train(self, X, y, snn_epochs=10):
         """Train the pipeline: SNN autoencoder + classifier."""
         print("🔁 Starting unsupervised SNN training...")
-        self.snn.train(X, epochs=snn_epochs)
+        self.snn.train_model(X, epochs=snn_epochs)
 
         print("📦 Extracting latent features...")
         features = self.snn.extract_features(X)
@@ -28,12 +28,12 @@ class SNN_ClassifierPipeline:
         print("✅ Pipeline training complete.")
 
     def predict(self, X):
-        """Predict using trained pipeline."""
-        if not self._is_trained:
-            raise RuntimeError("Pipeline not trained yet")
-
+        """Predicts labels for the given input data."""
         print("📦 Extracting features for prediction...")
         features = self.snn.extract_features(X)
+
+        # Debugging: Print feature shape
+        print(f"Extracted feature shape: {features.shape}")
 
         print("🔮 Running classifier prediction...")
         return self.classifier.predict(features)

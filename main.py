@@ -3,6 +3,8 @@ from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
 from utils import plot_confusion_matrix, plot_accuracy_curve, print_classification_report
 from model import DimensionalitySafeKernelRCE, SpikingRBFClassifier
+from brian2 import prefs
+prefs.codegen.target = 'numpy'  # Use numpy for code generation in Brian2
 
 import numpy as np
 

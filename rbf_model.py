@@ -15,11 +15,15 @@ class RBFModel:
         if not isinstance(X, np.ndarray) or not isinstance(y, np.ndarray):
             raise ValueError("X and y must be numpy arrays")
         if X.shape[0] != y.shape[0]:
-            raise ValueError("Number of samples in X and y must match")
+            raise ValueError(f"Number of samples in X ({X.shape[0]}) and y ({y.shape[0]}) must match")
 
         # Store training data
         self.X_train_ = X
         self.y_train_ = y
+
+        # Debugging: Print shapes
+        print(f"Training data shape: {self.X_train_.shape}")
+        print(f"Training labels shape: {self.y_train_.shape}")
 
         # Compute pairwise RBF similarities for training data
         self.similarity_matrix_ = np.exp(-self.gamma * np.linalg.norm(X[:, np.newaxis] - X, axis=2) ** 2)
@@ -32,6 +36,11 @@ class RBFModel:
         """Predicts labels for the given input data."""
         if not self._is_fitted:
             raise RuntimeError("Model not fitted yet")
+
+        # Debugging: Print shapes
+        print(f"Prediction data shape: {X.shape}")
+        print(f"Training data shape: {self.X_train_.shape}")
+        print(f"Training labels shape: {self.y_train_.shape}")
 
         predictions = []
         for sample in X:
