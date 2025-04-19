@@ -1,7 +1,7 @@
-Category,Model,Dataset,Run Folder,Mean Accuracy (%),Standard Deviation (%),epochs,hidden_size,sim_time,learning_rate,rce_gamma,rce_learning_rate,rbf_gamma,gamma
-Best Overall,RBF,HAND,run_20250418-192228,96.28,0.68,40.0,5.0,3.0,0.1,1.0,0.1,0.5,
-Best Per Dataset,RBF,WINE,run_20250418-180936,96.08,3.35,10.0,4.0,5.0,0.1,1.0,0.5,0.5,
-Best Per Dataset,RBF,HAND,run_20250418-192228,96.28,0.68,40.0,5.0,3.0,0.1,1.0,0.1,0.5,
-Best Per Dataset,RBF,IRIS,run_20250418-152103,95.33,3.4,10.0,5.0,200.0,0.1,,0.5,0.5,1.0
-Best Per Classifier,RCE,RCE,run_20250418-190159,96.12,1.36,10.0,5.0,10.0,0.1,1.0,0.1,0.5,
-Best Per Classifier,RBF,RBF,run_20250418-192228,96.28,0.68,40.0,5.0,3.0,0.1,1.0,0.1,0.5,
+Category,Model,Dataset,Run Folder,Mean Accuracy (%),Standard Deviation (%),epochs,hidden_size,sim_time,learning_rate,gamma,rce_learning_rate,rbf_gamma,rce_gamma
+Best Overall,RBF,IRIS,run_20250418-191404,96.67,2.98,300.0,20.0,2.0,0.015,0.85,0.1,0.8,
+Best Per Dataset,RBF,IRIS,run_20250418-191404,96.67,2.98,300.0,20.0,2.0,0.015,0.85,0.1,0.8,
+Best Per Dataset,RBF,WINE,run_20250418-220729,96.62,2.11,20.0,5.0,3.0,0.1,,0.1,0.5,1.0
+Best Per Dataset,RBF,HAND,run_20250418-190704,96.28,1.56,25.0,7.0,2.0,0.08,0.9,0.5,0.8,
+Best Per Classifier,RCE,RCE,run_20250418-190159,96.12,1.36,10.0,5.0,10.0,0.1,,0.1,0.5,1.0
+Best Per Classifier,RBF,RBF,run_20250418-191404,96.67,2.98,300.0,20.0,2.0,0.015,0.85,0.1,0.8,
