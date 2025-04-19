@@ -95,16 +95,20 @@ def parse_results_txt(file_path):
             elif "Mean Accuracy" in line and current_dataset and current_model:
                 mean_acc = float(re.search(r"Mean Accuracy: ([\d.]+)%", line).group(1))
                 results[current_dataset][current_model] = mean_acc
+            elif "Std Dev" in line and current_dataset and current_model:
+                std_dev = float(re.search(r"Std Dev: ([\d.]+)%", line).group(1))
+                results[current_dataset][f"{current_model}_std"] = std_dev
 
     return results
 
 def plot_results(results, title):
-    """Plots the results as a horizontal bar plot."""
+    """Plots the results as a horizontal bar plot with standard deviation."""
     datasets = list(results.keys())
     models = list(next(iter(results.values())).keys())  # Get models from the first dataset
 
     # Prepare data for plotting
     data = {model: [results[dataset].get(model, 0) for dataset in datasets] for model in models}
+    std_devs = {model: [results[dataset].get(f"{model}_std", 0) for dataset in datasets] for model in models}
 
     # Plot horizontal bar chart
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -112,12 +116,24 @@ def plot_results(results, title):
     y_positions = range(len(datasets))
 
     for i, (model, accuracies) in enumerate(data.items()):
-        ax.barh(
+        bars = ax.barh(
             [y + i * bar_width for y in y_positions],
             accuracies,
             height=bar_width,
             label=model,
+            xerr=std_devs[model],  # Add error bars for standard deviation
+            capsize=5,  # Add caps to the error bars
         )
+
+        # Annotate bars with values
+        for bar, accuracy in zip(bars, accuracies):
+            ax.text(
+                bar.get_width() - 10.0,  # Position slightly to the right of the bar
+                bar.get_y() + bar.get_height() / 2,  # Center vertically
+                f"{accuracy:.2f}%",  # Format as percentage
+                va="center",
+                fontsize=10,
+            )
 
     # Add labels and title
     ax.set_yticks([y + bar_width / 2 for y in y_positions])
@@ -127,13 +143,6 @@ def plot_results(results, title):
 
     # Move the legend outside the plot
     ax.legend(title="Model", fontsize=10, title_fontsize=12, loc='upper left', bbox_to_anchor=(1.05, 1))
-
-    # Annotate bars with values
-    for bars in ax.containers:
-        for bar in bars:
-            width = bar.get_width()
-            if width > 0:  # Only annotate non-zero bars
-                ax.text(width + 0.5, bar.get_y() + bar.get_height() / 2, f"{width:.2f}%", va="center", fontsize=10)
 
     plt.tight_layout()
     plt.show()
@@ -156,11 +165,12 @@ if __name__ == "__main__":
         # Parse the results.txt file
         results_data = parse_results_txt(results_txt_path)
 
-        name = f"{str(cat)} - {str(mod) if not nan  else ''} - {str(data).replace(' ===', '') if not nan  else ''}"  # Remove " ===" from dataset name
+        name = f"{str(cat)} - {str(mod)} - {str(data).replace(' ===', '')}"  # Remove " ===" from dataset name
+        
         # Plot the results
         plot_results(results_data, title="Comparison of Classifiers Across Datasets\n" + name)
         # Save the plot as an image
-        plot_path = f"./runs/{file}/plots/{name}.png"
+        plot_path = f"./runs/{file}/plots/{name.replace(' ', '_')}.png"
         os.makedirs(os.path.dirname(plot_path), exist_ok=True)
         plt.savefig(plot_path)
         plt.close()

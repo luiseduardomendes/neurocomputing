@@ -23,7 +23,8 @@ def parse_results(file_path):
         for line in f:
             line = line.strip()
             if line.startswith("=== Dataset:"):
-                current_dataset = line.split(":")[1].strip()
+                # Extract the dataset name and remove trailing "===" and whitespace
+                current_dataset = line.split(":")[1].strip().replace(" ===", "")
                 results[current_dataset] = {}
             elif line.endswith(":") and current_dataset:
                 current_model = line[:-1]
@@ -75,6 +76,7 @@ def find_best_results(runs_folder):
                         metrics["mean_accuracy"],
                         metrics["std_deviation"],
                         model,
+                        dataset,
                         params,
                         run_folder,
                     )
@@ -84,6 +86,8 @@ def find_best_results(runs_folder):
                     best_per_classifier[model] = (
                         metrics["mean_accuracy"],
                         metrics["std_deviation"],
+                        model,
+                        dataset,  # Include the dataset name here
                         params,
                         run_folder,
                     )
@@ -113,10 +117,10 @@ def display_results(best_overall, best_per_dataset, best_per_classifier):
             "Category": "Best Per Dataset",
             "Model": result[2],
             "Dataset": dataset,
-            "Run Folder": result[4],
+            "Run Folder": result[5],
             "Mean Accuracy (%)": result[0],
             "Standard Deviation (%)": result[1],
-            **result[3]  # Unpack parameters
+            **result[4]  # Unpack parameters
         })
     df_dataset = pd.DataFrame(dataset_rows)
     print(df_dataset)
@@ -128,11 +132,11 @@ def display_results(best_overall, best_per_dataset, best_per_classifier):
         classifier_rows.append({
             "Category": "Best Per Classifier",
             "Model": model,
-            "Dataset": "",
-            "Run Folder": result[3],
+            "Dataset": result[2],  # Include the dataset name here
+            "Run Folder": result[5],
             "Mean Accuracy (%)": result[0],
             "Standard Deviation (%)": result[1],
-            **result[2]  # Unpack parameters
+            **result[4]  # Unpack parameters
         })
     df_classifier = pd.DataFrame(classifier_rows)
     print(df_classifier)

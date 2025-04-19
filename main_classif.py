@@ -8,6 +8,7 @@ from rbf_model import RBFModel
 from snn_classifier_pipeline import SNN_ClassifierPipeline
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import confusion_matrix
 from utils import plot_confusion_matrix, print_classification_report
 
 # === Hyperparameters ===
@@ -83,7 +84,10 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=N_SPLITS):
     """Trains and evaluates the SNN pipeline with RCE and RBF classifiers."""
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
 
-    results = {"RCE": {"fold_accuracies": []}, "RBF": {"fold_accuracies": []}}
+    results = {
+        "RCE": {"fold_accuracies": [], "y_true": [], "y_pred": []},
+        "RBF": {"fold_accuracies": [], "y_true": [], "y_pred": []},
+    }
 
     for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
         print(f"\nFold {fold + 1}/{n_splits}")
@@ -106,6 +110,8 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=N_SPLITS):
         # Evaluate RCE pipeline
         acc_rce = np.mean(y_pred_rce == y_val)
         results["RCE"]["fold_accuracies"].append(acc_rce)
+        results["RCE"]["y_true"].extend(y_val)
+        results["RCE"]["y_pred"].extend(y_pred_rce)
 
         # === SNN Autoencoder + RBF Classifier ===
         print("\n🔁 Training SNN Autoencoder + RBF Classifier Pipeline...")
@@ -117,11 +123,22 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=N_SPLITS):
         # Evaluate RBF pipeline
         acc_rbf = np.mean(y_pred_rbf == y_val)
         results["RBF"]["fold_accuracies"].append(acc_rbf)
+        results["RBF"]["y_true"].extend(y_val)
+        results["RBF"]["y_pred"].extend(y_pred_rbf)
 
     # Calculate mean and std for each model
     for model_name in results.keys():
         results[model_name]["mean_accuracy"] = np.mean(results[model_name]["fold_accuracies"])
         results[model_name]["std_accuracy"] = np.std(results[model_name]["fold_accuracies"])
+
+        # Compute overall confusion matrix
+        overall_cm = confusion_matrix(results[model_name]["y_true"], results[model_name]["y_pred"])
+        plot_confusion_matrix(
+            results[model_name]["y_true"],
+            results[model_name]["y_pred"],
+            target_names,
+            title=f"{model_name} Overall Confusion Matrix ({dataset_name})",
+        )
 
     return results
 
