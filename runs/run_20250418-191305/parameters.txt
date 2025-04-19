@@ -1,0 +1,9 @@
+=== Run Parameters ===
+epochs: 40
+hidden_size: 5
+sim_time: 3
+learning_rate: 0.1
+rce_gamma: 0.8
+rce_learning_rate: 0.1
+rbf_gamma: 0.5
+n_splits: 5

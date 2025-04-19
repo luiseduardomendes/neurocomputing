@@ -8,22 +8,19 @@ from rbf_model import RBFModel
 from snn_classifier_pipeline import SNN_ClassifierPipeline
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
-
 from utils import plot_confusion_matrix, print_classification_report
 
-def parse_arguments():
-    """
-    Parse command-line arguments for the script.
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=10, help="Number of epochs for training")
-    parser.add_argument("--hidden_size", type=int, default=3, help="Size of the hidden layer")
-    parser.add_argument("--sim_time", type=int, default=100, help="Simulation time for SNN")
-    parser.add_argument("--learning_rate", type=float, default=0.1, help="Learning rate for SNN")
-    parser.add_argument("--gamma", type=float, default=1.0, help="Gamma parameter for RCE")
-    parser.add_argument("--rce_learning_rate", type=float, default=0.5, help="Learning rate for RCE")
-    parser.add_argument("--rbf_gamma", type=float, default=0.5, help="Gamma parameter for RBF")
-    return vars(parser.parse_args())
+# === Hyperparameters ===
+EPOCHS = 20  # Number of epochs for SNN training
+HIDDEN_SIZE = 5  # Size of the hidden layer in the SNN autoencoder
+SIM_TIME = 3  # Simulation time for SNN (in timesteps)
+LEARNING_RATE = 0.1  # Learning rate for SNN
+RCE_GAMMA = 1.0  # Gamma parameter for RCE
+RCE_LEARNING_RATE = 0.1  # Learning rate for RCE
+RBF_GAMMA = 0.5  # Gamma parameter for RBF
+N_SPLITS = 5  # Number of splits for K-Fold cross-validation
+THRESHOLD = 1.0  # Threshold for SNN neurons
+# ========================
 
 def save_run_results(params, results, folder="runs"):
     """
@@ -82,7 +79,7 @@ def load_and_preprocess_data(dataset_name, scale=True):
     
     return X, y, target_names
 
-def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5, params=None):
+def train_and_evaluate(X, y, target_names, dataset_name, n_splits=N_SPLITS):
     """Trains and evaluates the SNN pipeline with RCE and RBF classifiers."""
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
 
@@ -92,7 +89,6 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5, params=None
         print(f"\nFold {fold + 1}/{n_splits}")
         X_train, X_val = X[train_idx], X[val_idx]
         y_train, y_val = y[train_idx], y[val_idx]
-        epochs = params["epochs"]  # Number of epochs for SNN training
 
         # Normalize data
         scaler = StandardScaler()
@@ -101,10 +97,10 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5, params=None
 
         # === SNN Autoencoder + RCE Classifier ===
         print("\n🔁 Training SNN Autoencoder + RCE Classifier Pipeline...")
-        snn = SNN_Autoencoder(input_size=X.shape[1], hidden_size=params["hidden_size"], sim_time=params["sim_time"], learning_rate=params["learning_rate"])
-        rce = RCEModel(gamma=params["gamma"], learning_rate=params["rce_learning_rate"])
+        snn = SNN_Autoencoder(input_size=X.shape[1], hidden_size=HIDDEN_SIZE, sim_time=SIM_TIME, learning_rate=LEARNING_RATE, threshold=THRESHOLD)
+        rce = RCEModel(gamma=RCE_GAMMA, learning_rate=RCE_LEARNING_RATE)
         pipeline_rce = SNN_ClassifierPipeline(snn_model=snn, classifier=rce)
-        pipeline_rce.train(X_train, y_train, snn_epochs=epochs)
+        pipeline_rce.train(X_train, y_train, snn_epochs=EPOCHS)
         y_pred_rce = pipeline_rce.predict(X_val)
 
         # Evaluate RCE pipeline
@@ -113,9 +109,9 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5, params=None
 
         # === SNN Autoencoder + RBF Classifier ===
         print("\n🔁 Training SNN Autoencoder + RBF Classifier Pipeline...")
-        rbf = RBFModel(gamma=params["rbf_gamma"])
+        rbf = RBFModel(gamma=RBF_GAMMA)
         pipeline_rbf = SNN_ClassifierPipeline(snn_model=snn, classifier=rbf)
-        pipeline_rbf.train(X_train, y_train, snn_epochs=epochs)
+        pipeline_rbf.train(X_train, y_train, snn_epochs=EPOCHS)
         y_pred_rbf = pipeline_rbf.predict(X_val)
 
         # Evaluate RBF pipeline
@@ -151,20 +147,28 @@ def main():
         print("Invalid choice.")
         return
 
-    params = parse_arguments()
-
     all_results = {}
 
     for dataset_name in datasets:
         print(f"\n=== Processing Dataset: {dataset_name.upper()} ===")
         scale = dataset_name != "hand"  # No StandardScaler for spike data
+        scale = False
         X, y, target_names = load_and_preprocess_data(dataset_name, scale=scale)
 
         print(f"Samples: {X.shape[0]}, Features: {X.shape[1]}, Classes: {len(np.unique(y))}")
-        results = train_and_evaluate(X, y, target_names, dataset_name, n_splits=5, params=params)
+        results = train_and_evaluate(X, y, target_names, dataset_name)
         all_results[dataset_name] = results
 
-    save_run_results(params, all_results)
+    save_run_results({
+        "epochs": EPOCHS,
+        "hidden_size": HIDDEN_SIZE,
+        "sim_time": SIM_TIME,
+        "learning_rate": LEARNING_RATE,
+        "rce_gamma": RCE_GAMMA,
+        "rce_learning_rate": RCE_LEARNING_RATE,
+        "rbf_gamma": RBF_GAMMA,
+        "n_splits": N_SPLITS
+    }, all_results)
 
 if __name__ == "__main__":
     main()

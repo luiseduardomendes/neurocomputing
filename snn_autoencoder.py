@@ -3,11 +3,12 @@ import torch.nn as nn
 import snntorch as snn
 import matplotlib.pyplot as plt
 import numpy as np
+import time  # Import the time module
 
 class SNN_Autoencoder(nn.Module):
     """Spiking Neural Network Autoencoder for feature extraction using SNNtorch."""
 
-    def __init__(self, input_size, hidden_size, sim_time=100, learning_rate=0.01):
+    def __init__(self, input_size, hidden_size, sim_time=100, learning_rate=0.01, threshold=0.9):
         super(SNN_Autoencoder, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -16,12 +17,12 @@ class SNN_Autoencoder(nn.Module):
         self._is_trained = False
 
         # Initialize weights
-        self.encoder_weights = nn.Parameter(torch.rand(input_size, hidden_size))
-        self.decoder_weights = nn.Parameter(torch.rand(hidden_size, input_size))
+        self.encoder_weights = nn.Parameter(torch.randn(input_size, hidden_size) * 0.1)
+        self.decoder_weights = nn.Parameter(torch.randn(hidden_size, input_size) * 0.1)
 
         # Define spiking neuron layers
-        self.encoder_neuron = snn.Leaky(beta=0.9)
-        self.decoder_neuron = snn.Leaky(beta=0.9)
+        self.encoder_neuron = snn.Leaky(beta=0.9, threshold=threshold)
+        self.decoder_neuron = snn.Leaky(beta=0.9, threshold=threshold)
 
     def forward(self, x):
         """Forward pass through the autoencoder."""
@@ -112,15 +113,23 @@ def plot_weights(weights, title):
 
 
 if __name__ == "__main__":
+    # Start the timer
+    start_time = time.time()
+
     # Instantiate the autoencoder
-    X = np.random.rand(5, 3)  # 5 samples, 3 features
-    snn_autoencoder = SNN_Autoencoder(input_size=3, hidden_size=5, sim_time=100, learning_rate=0.1)
-    snn_autoencoder.train_model(X, epochs=25, batch_size=2)
+    X = np.random.rand(50, 3)  # 5 samples, 3 features
+    snn_autoencoder = SNN_Autoencoder(input_size=3, hidden_size=2, sim_time=10, learning_rate=0.5)
+    snn_autoencoder.train_model(X, epochs=25, batch_size=5)
 
     # Extract features
     features = snn_autoencoder.extract_features(X)
     print("Extracted features shape:", features.shape)
 
     # Plot the encoder and decoder weights
-    plot_weights(snn_autoencoder.encoder_weights, "Encoder Weights")
-    plot_weights(snn_autoencoder.decoder_weights, "Decoder Weights")
+    # plot_weights(snn_autoencoder.encoder_weights, "Encoder Weights")
+    # plot_weights(snn_autoencoder.decoder_weights, "Decoder Weights")
+
+    # End the timer
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Execution time: {elapsed_time:.2f} seconds")
