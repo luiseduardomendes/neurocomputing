@@ -12,13 +12,13 @@ from sklearn.metrics import confusion_matrix
 from utils import plot_confusion_matrix, print_classification_report
 
 # === Hyperparameters ===
-EPOCHS = 20  # Number of epochs for SNN training
-HIDDEN_SIZE = 5  # Size of the hidden layer in the SNN autoencoder
-SIM_TIME = 3  # Simulation time for SNN (in timesteps)
-LEARNING_RATE = 0.1  # Learning rate for SNN
-RCE_GAMMA = 1.0  # Gamma parameter for RCE
+EPOCHS = 300  # Number of epochs for SNN training
+HIDDEN_SIZE = 20  # Size of the hidden layer in the SNN autoencoder
+SIM_TIME = 2  # Simulation time for SNN (in timesteps)
+LEARNING_RATE = 0.015  # Learning rate for SNN
+RCE_GAMMA = 0.85  # Gamma parameter for RCE
 RCE_LEARNING_RATE = 0.1  # Learning rate for RCE
-RBF_GAMMA = 0.5  # Gamma parameter for RBF
+RBF_GAMMA = 0.8  # Gamma parameter for RBF
 N_SPLITS = 5  # Number of splits for K-Fold cross-validation
 THRESHOLD = 1.0  # Threshold for SNN neurons
 # ========================
@@ -149,8 +149,8 @@ def main():
     print("3. Iris dataset")
     print("4. All datasets")
 
-    #choice = input("\nSelect dataset (1-4): ")
-    choice = "4"  # For testing purposes, we can set the choice directly
+    choice = input("\nSelect dataset (1-4): ")
+    #choice = "4"  # For testing purposes, we can set the choice directly
 
     if choice == "1":
         datasets = ['hand']
