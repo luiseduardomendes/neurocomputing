@@ -2,7 +2,8 @@ from data_loader import load_and_process_data
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import StandardScaler
 from utils import plot_confusion_matrix, plot_accuracy_curve, print_classification_report
-from model import DimensionalitySafeKernelRCE, SpikingRBFClassifier
+from sklearn.svm import SVC
+from model import DimensionalitySafeKernelRCE
 
 import numpy as np
 
@@ -72,13 +73,19 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5):
         rce_all_y_true.extend(y_val)
         rce_all_y_pred.extend(rce_pred)
 
-        # === Spiking RBF Classifier ===
-        print("\nTraining Spiking RBF Classifier...")
-        rbf_model = SpikingRBFClassifier(gamma=0.005)  # Try smaller or larger values
+        # === RBF Classifier ===
+        print("\nTraining RBF Classifier...")
+        rbf_model = SVC(
+            kernel='rbf',      # Kernel type
+            gamma="scale",     # Kernel parameter
+            C=0.6,             # Regularization parameter
+            class_weight='balanced',  # Class balancing
+            random_state=42    # Random number generator
+        )
         rbf_model.fit(X_train, y_train)
         rbf_pred = rbf_model.predict(X_val)
         rbf_acc = np.mean(rbf_pred == y_val)
-        print(f"Spiking RBF Classifier Accuracy: {rbf_acc * 100:.2f}%")
+        print(f"RBF Classifier Accuracy: {rbf_acc * 100:.2f}%")
         rbf_fold_accuracies.append(rbf_acc)
         rbf_all_y_true.extend(y_val)
         rbf_all_y_pred.extend(rbf_pred)
@@ -89,7 +96,7 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5):
     print(f"Mean Accuracy: {np.mean(rce_fold_accuracies) * 100:.2f}%")
     print(f"Standard Deviation: {np.std(rce_fold_accuracies) * 100:.2f}%")
 
-    print("\nSpiking RBF Classifier:")
+    print("\nRBF Classifier:")
     print(f"Mean Accuracy: {np.mean(rbf_fold_accuracies) * 100:.2f}%")
     print(f"Standard Deviation: {np.std(rbf_fold_accuracies) * 100:.2f}%")
 
@@ -107,7 +114,7 @@ def train_and_evaluate(X, y, target_names, dataset_name, n_splits=5):
     print("\nClassification Reports:")
     print("\nDimensionality-Safe Kernel RCE Classifier:")
     print_classification_report(rce_all_y_true, rce_all_y_pred)
-    print("\nSpiking RBF Classifier:")
+    print("\nRBF Classifier:")
     print_classification_report(rbf_all_y_true, rbf_all_y_pred)
 
 def main():
